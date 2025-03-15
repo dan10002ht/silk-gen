@@ -1,0 +1,67 @@
+# Cursor Rules for Thuyen Silk Project
+
+## Project Overview
+
+This is a web application for inventory management built with React, Javascript on the frontend and Node.js, Express, Postgresql on the backend.
+
+## Tech Stack
+
+- Use `yarn` for manage the packages
+- Frontend: React 18 (Vite), Javascript, Shadcn UI
+- Backend: Node.js, Express, MongoDB
+- Testing: Jest, React Testing Library
+- State Management: Redux Toolkit, useContext
+- API: RESTful
+- Cache and background handler: Redis
+
+## Code Conventions
+
+- Using shadcn, tailwindCSS and scss for components
+- Components use PascalCase (e.g., ProductList.jsx)
+- Hooks use camelCase with 'use' prefix (e.g., useProducts.js)
+- Utility functions use camelCase (e.g., formatCurrency.ts)
+- Constants use UPPER_SNAKE_CASE and group by using purpose
+- Use 2 spaces for indentation
+- Maximum line length is around 100 characters for components, split file if necessary
+- Use single quotes for strings
+- if there are more than 2 props, use destructuring props like ({firstProps, secondProps, thirdProps})
+
+## Project Structure
+
+- Frontend is organized by atomic design
+- Backend follows Repository design pattern
+- Components should be small and focused on a single responsibility (Atomic design)
+- Every components should have propTypes, index.js for shorter import path
+
+## Business Logic
+
+## Common Patterns
+
+- Use React functional components with hooks
+- Prefer async/await over promise chains
+- Use React Query for data fetching
+- Use Formik with Yup for form validation
+- All API calls should include error handling
+- Code should be well-commented, especially complex logic
+
+## Things to Avoid
+
+- Class components
+- Direct DOM manipulation
+- Prop drilling (use Context or Redux instead)
+- Mixing business logic with UI components
+- Hardcoded values (use constants or environment variables)
+
+## Performance Considerations
+
+- Memoize expensive calculations with useMemo
+- Prevent unnecessary re-renders with useCallback and React.memo
+- Lazy load components when appropriate
+- Use pagination for large data sets
+
+## Frontend convention
+
+- Create useFetchApi, useEditApi, useCreateApi for fetching, editing, creating data
+
+
+## Use
