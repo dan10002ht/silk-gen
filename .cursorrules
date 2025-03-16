@@ -2,66 +2,293 @@
 
 ## Project Overview
 
-This is a web application for inventory management built with React, Javascript on the frontend and Node.js, Express, Postgresql on the backend.
-
-## Tech Stack
-
-- Use `yarn` for manage the packages
-- Frontend: React 18 (Vite), Javascript, Shadcn UI
-- Backend: Node.js, Express, MongoDB
-- Testing: Jest, React Testing Library
-- State Management: Redux Toolkit, useContext
-- API: RESTful
-- Cache and background handler: Redis
-
-## Code Conventions
-
-- Using shadcn, tailwindCSS and scss for components
-- Components use PascalCase (e.g., ProductList.jsx)
-- Hooks use camelCase with 'use' prefix (e.g., useProducts.js)
-- Utility functions use camelCase (e.g., formatCurrency.ts)
-- Constants use UPPER_SNAKE_CASE and group by using purpose
-- Use 2 spaces for indentation
-- Maximum line length is around 100 characters for components, split file if necessary
-- Use single quotes for strings
-- if there are more than 2 props, use destructuring props like ({firstProps, secondProps, thirdProps})
+This is a web application for inventory management built with React, Javascript on the frontend and Node.js, Express, PostgreSQL on the backend.
 
 ## Project Structure
 
-- Frontend is organized by atomic design
-- Backend follows Repository design pattern
-- Components should be small and focused on a single responsibility (Atomic design)
-- Every components should have propTypes, index.js for shorter import path
+```
+/
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/          # shadcn components (lowercase)
+│   │   │   ├── atoms/       # basic building blocks
+│   │   │   ├── molecules/   # combinations of atoms
+│   │   │   ├── organisms/   # complex components
+│   │   │   ├── templates/   # layout components
+│   │   │   └── pages/       # page components
+│   │   ├── hooks/          # custom hooks
+│   │   ├── lib/           # utilities and helpers
+│   │   ├── store/         # Redux store
+│   │   ├── api/           # API integration
+│   │   ├── styles/        # global styles
+│   │   └── assets/        # static assets
+│   ├── public/           # public assets
+│   └── tests/            # frontend tests
+│
+└── backend/
+    ├── src/
+    │   ├── controllers/  # route controllers
+    │   ├── models/       # database models
+    │   ├── routes/       # API routes
+    │   ├── services/     # business logic
+    │   ├── middleware/   # custom middleware
+    │   ├── utils/        # utilities
+    │   └── config/       # configuration
+    ├── tests/           # backend tests
+    └── scripts/         # maintenance scripts
+```
 
-## Business Logic
+## Tech Stack
+
+### Frontend
+
+- Package Manager: `yarn`
+- Framework: React 18 (Vite)
+- UI Components: Shadcn UI
+- State Management: Redux Toolkit, useContext
+- Testing: Jest, React Testing Library
+- Styling: TailwindCSS, SCSS
+
+### Backend
+
+- Runtime: Node.js
+- Framework: Express
+- Database: PostgreSQL with Sequelize ORM
+- Cache: Redis
+- Testing: Jest
+- API: RESTful
+- Container: Docker
+- Code Style: ES6+
+
+## Frontend Conventions
+
+### Component Organization
+
+- Shadcn components go in `ui/` folder with lowercase names (e.g., `button.jsx`)
+- Custom components follow atomic design in respective folders
+- Custom components use PascalCase (e.g., `ProductList.jsx`)
+- Every component should have:
+  - PropTypes for type checking
+  - index.js for shorter import paths
+  - Single responsibility focus
+  - Maximum 100 lines, split if longer
+
+### PropTypes Guidelines
+
+- Every component MUST have PropTypes defined and exported
+- Required props MUST use `isRequired` modifier
+- PropTypes should be defined at the bottom of the component file
+- Common PropTypes patterns:
+  ```jsx
+  ComponentName.propTypes = {
+    // Basic types
+    name: PropTypes.string.isRequired,
+    age: PropTypes.number,
+    isActive: PropTypes.bool,
+    onClick: PropTypes.func.isRequired,
+
+    // React node (children)
+    children: PropTypes.node.isRequired,
+
+    // Arrays
+    items: PropTypes.arrayOf(PropTypes.string).isRequired,
+
+    // Objects
+    user: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired,
+    }).isRequired,
+
+    // Styling
+    className: PropTypes.string,
+    style: PropTypes.object,
+
+    // Multiple types
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+
+    // Specific values
+    variant: PropTypes.oneOf(['primary', 'secondary', 'tertiary']),
+
+    // Custom validation
+    customProp: function (props, propName, componentName) {
+      if (!/matchme/.test(props[propName])) {
+        return new Error(
+          'Invalid prop `' +
+            propName +
+            '` supplied to' +
+            ' `' +
+            componentName +
+            '`. Validation failed.'
+        );
+      }
+    },
+  };
+  ```
+- Default props should be defined using default parameters in function components:
+  ```jsx
+  const MyComponent = ({ name = 'Default', age = 0 }) => {
+    // Component code
+  };
+  ```
+- For complex objects, use PropTypes.shape instead of PropTypes.object
+- For collections, always specify the shape of items using PropTypes.arrayOf
+- Document any non-obvious prop requirements with comments
+- Use PropTypes.node for children props unless specific type is required
+- For event handlers, use PropTypes.func and include 'isRequired' if mandatory
+- For styling props, always include PropTypes for className and style if component accepts them
+- For enum-like props, use PropTypes.oneOf with all possible values listed
+- For optional numbers that could be null, use PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])])
+
+### Naming Conventions
+
+- Components: PascalCase (e.g., `ProductList.jsx`)
+- Hooks: camelCase with 'use' prefix (e.g., `useProducts.js`)
+- Utils: camelCase (e.g., `formatCurrency.js`)
+- Constants: UPPER_SNAKE_CASE grouped by purpose
+
+### Styling
+
+- Use shadcn/ui components as base
+- Extend with tailwindCSS
+- Use SCSS for custom styling when needed
+- Follow shadcn's variant pattern for component variations
+
+### JavaScript/React
+
+- Use single quotes for strings
+- Use 2 spaces for indentation
+- Maximum line length: 100 characters
+- Destructure props when more than 2 (e.g., `({firstProp, secondProp, thirdProp})`)
+- Use functional components with hooks
+- Prefer async/await over promise chains
+
+## Backend Conventions
+
+### Code Organization
+
+- Follow Repository pattern
+- Controllers handle request/response
+- Services contain business logic
+- Models define database schemas
+- Routes define API endpoints
+- Middleware for cross-cutting concerns
+
+### Naming Conventions
+
+- Files: camelCase
+- Classes: PascalCase
+- Functions: camelCase
+- Constants: UPPER_SNAKE_CASE
+- Routes: kebab-case for URLs
+
+### API Conventions
+
+- RESTful endpoints
+- JSON responses
+- Consistent error handling
+- Request validation
+- API versioning
+- Rate limiting
+- Authentication/Authorization middleware
 
 ## Common Patterns
 
-- Use React functional components with hooks
-- Prefer async/await over promise chains
-- Use React Query for data fetching
-- Use Formik with Yup for form validation
-- All API calls should include error handling
-- Code should be well-commented, especially complex logic
+### Frontend
+
+- Custom hooks for API operations:
+  - useFetchApi - for GET operations
+  - useEditApi - for PUT/PATCH operations
+  - useCreateApi - for POST operations
+- Form handling with Formik + Yup
+- React Query for data fetching
+- Error boundaries for error handling
+
+### Backend
+
+- Async/await for asynchronous operations
+- Middleware for common functionality
+- Environment-based configuration
+- Structured error handling
+- Request validation
+- Database transactions
+- Caching strategies
 
 ## Things to Avoid
+
+### Frontend
 
 - Class components
 - Direct DOM manipulation
 - Prop drilling (use Context or Redux instead)
 - Mixing business logic with UI components
-- Hardcoded values (use constants or environment variables)
+- Hardcoded values (use constants)
+- Duplicate shadcn components
 
-## Performance Considerations
+### Backend
 
-- Memoize expensive calculations with useMemo
-- Prevent unnecessary re-renders with useCallback and React.memo
-- Lazy load components when appropriate
-- Use pagination for large data sets
+- Mixing concerns in single files
+- Direct database queries in controllers
+- Unsanitized user input
+- Sync operations for I/O
+- Hard-coded configuration
+- Business logic in controllers
 
-## Frontend convention
+## Performance Best Practices
 
-- Create useFetchApi, useEditApi, useCreateApi for fetching, editing, creating data
+### Frontend
 
+- Memoize expensive calculations (useMemo)
+- Prevent unnecessary re-renders (useCallback, React.memo)
+- Implement lazy loading
+- Use pagination for large datasets
+- Code splitting
+- Asset optimization
 
-## Use
+### Backend
+
+- Implement caching
+- Database indexing
+- Query optimization
+- Connection pooling
+- Rate limiting
+- Response compression
+
+## Testing Guidelines
+
+### Frontend
+
+- Jest and React Testing Library
+- Component testing
+- Hook testing
+- Redux store testing
+- Integration testing
+- E2E testing with Cypress
+
+### Backend
+
+- Unit tests for services
+- Integration tests for APIs
+- Database testing
+- Mock external services
+- Test coverage requirements
+- Performance testing
+
+## Documentation
+
+- Comment complex logic
+- API documentation
+- Component PropTypes
+- README files
+- Setup instructions
+- Deployment guides
+
+## Git Practices
+
+- Meaningful commit messages
+- Feature branching
+- PR templates
+- Code review process
+- Branch naming conventions
+- Version tagging
