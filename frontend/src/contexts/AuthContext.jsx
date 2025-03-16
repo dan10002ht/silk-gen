@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const AuthContext = createContext(null);
 
@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in (e.g., check localStorage or token)
-    const token = localStorage.getItem("auth_token");
+    const token = localStorage.getItem('auth_token');
     if (token) {
       // You can add token validation logic here
       setUser({ token }); // Replace with actual user data
@@ -17,14 +17,14 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (userData) => {
+  const login = async userData => {
     // Add your login logic here
-    localStorage.setItem("auth_token", userData.token);
+    localStorage.setItem('auth_token', userData.token);
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem("auth_token");
+    localStorage.removeItem('auth_token');
     setUser(null);
   };
 
@@ -36,11 +36,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };
 
 AuthProvider.propTypes = {
@@ -50,7 +46,7 @@ AuthProvider.propTypes = {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

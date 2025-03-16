@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import FormInput from '@/components/atoms/FormInput';
 import AuthCard from '@/components/molecules/AuthCard';
-import { useAuth } from 'frontend/src/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -110,12 +110,12 @@ const Login = () => {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" variant="outline" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
 
             <p className="text-sm text-center text-gray-600">
-              Don't have an account?{' '}
+              {`Don't have an account? `}
               <Link to="/register" className="font-medium text-primary hover:text-primary/90">
                 Sign up
               </Link>

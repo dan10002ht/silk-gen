@@ -1,0 +1,24 @@
+FROM node:18-alpine
+
+# Install dependencies required for development
+RUN apk add --no-cache tzdata
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock ./
+
+# Install dependencies
+RUN yarn install
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV TZ=UTC
+
+# Expose port
+EXPOSE 3000
+
+# Default command (will be overridden by docker-compose)
+CMD ["yarn", "dev"] 

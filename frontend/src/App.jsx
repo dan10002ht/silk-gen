@@ -1,14 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from 'frontend/src/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/molecules/ProtectedRoute/ProtectedRoute';
-
-// Auth Pages
-import Login from 'frontend/src/pages/auth/Login';
-import Register from 'frontend/src/pages/auth/Register';
-
-// Protected Pages (add your other pages here)
-import Dashboard from 'frontend/src/pages/Dashboard'; // You'll need to create this
+import Login from '@/pages/auth/Login';
+import Register from '@/pages/auth/Register';
+import Dashboard from '@/pages/Dashboard';
 
 const App = () => {
   return (

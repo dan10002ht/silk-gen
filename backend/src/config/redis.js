@@ -1,4 +1,4 @@
-import Redis from 'redis';
+import * as Redis from 'redis';
 import { processInBackground } from '../services/backgroundHandler';
 
 // Create Redis clients (one for pub, one for sub to avoid blocking)

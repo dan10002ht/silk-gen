@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { useAuth } from 'frontend/src/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Dashboard = () => {
   const { logout, user } = useAuth();
