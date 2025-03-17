@@ -1,7 +1,7 @@
 import { connectDB } from './database.js';
 import { connectRedis } from './redis.js';
 
-const initializeServer = async (app) => {
+const initializeServer = async app => {
   try {
     // Connect to PostgreSQL
     await connectDB();
@@ -20,4 +20,4 @@ const initializeServer = async (app) => {
   }
 };
 
-export default initializeServer; 
+export default initializeServer;

@@ -1,182 +1,169 @@
-import * as Redis from 'redis';
-import { processInBackground } from '../services/backgroundHandler';
+import Redis from 'ioredis';
+import environment from './environment';
 
-// Create Redis clients (one for pub, one for sub to avoid blocking)
-const publisher = Redis.createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
+// Redis client configuration
+const redisClient = new Redis(environment.REDIS_URL, {
+  retryStrategy: times => {
+    const delay = Math.min(times * 50, 2000);
+    return delay;
+  },
 });
 
-const subscriber = publisher.duplicate();
-
-// Dynamic topics management
-class TopicsManager {
-  constructor() {
-    this.topics = new Map();
-    this.lastUsed = new Map();
-    this.cleanupInterval = 24 * 60 * 60 * 1000; // 24 hours
-  }
-
-  // Add or get topic
-  getTopic(name) {
-    if (!this.topics.has(name)) {
-      this.topics.set(name, name.toLowerCase());
-    }
-    this.updateLastUsed(name);
-    return this.topics.get(name);
-  }
-
-  // Update last used timestamp
-  updateLastUsed(topic) {
-    this.lastUsed.set(topic, Date.now());
-  }
-
-  // Get all active topics
-  getAllTopics() {
-    return Array.from(this.topics.values());
-  }
-
-  // Check if topic exists
-  hasTopic(name) {
-    return this.topics.has(name);
-  }
-
-  // Remove unused topics
-  async cleanup(maxAge = this.cleanupInterval) {
-    const now = Date.now();
-    const unusedTopics = Array.from(this.lastUsed.entries())
-      .filter(([topic, lastUsed]) => now - lastUsed > maxAge)
-      .map(([topic]) => topic);
-
-    for (const topic of unusedTopics) {
-      this.topics.delete(topic);
-      this.lastUsed.delete(topic);
-      console.log(`Cleaned up unused topic: ${topic}`);
-    }
-
-    return unusedTopics;
-  }
-}
-
-// Create topics manager instance
-const topicsManager = new TopicsManager();
-
-// Initialize with core topics
-const CORE_TOPICS = {
+// Core topics for the application
+export const TOPICS = {
   NOTIFICATION: 'notification',
   INVENTORY: 'inventory',
   ORDER: 'order',
   SYSTEM: 'system',
 };
 
-Object.entries(CORE_TOPICS).forEach(([key, value]) => {
-  topicsManager.getTopic(value);
-});
-
-// Connect Redis clients
-const connectRedis = async () => {
-  try {
-    await Promise.all([publisher.connect(), subscriber.connect()]);
-    console.log('Redis Pub/Sub clients connected');
-
-    // Start periodic cleanup
-    setInterval(() => {
-      topicsManager
-        .cleanup()
-        .then(cleaned => {
-          if (cleaned.length > 0) {
-            console.log('Cleaned topics:', cleaned);
-          }
-        })
-        .catch(error => console.error('Cleanup error:', error));
-    }, topicsManager.cleanupInterval);
-  } catch (error) {
-    console.error('Redis connection error:', error);
-    process.exit(1);
+// Topics manager for handling dynamic topics
+class TopicsManager {
+  constructor() {
+    this.topics = new Set(Object.values(TOPICS));
+    this.lastUsed = new Map();
   }
-};
 
-// Publisher class for handling message publishing
-class Publisher {
-  static async publish(topic, message) {
-    try {
-      const actualTopic = topicsManager.getTopic(topic);
-      const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
-      await publisher.publish(actualTopic, messageStr);
-      console.log(`Published to ${actualTopic}:`, message);
-      return { published: true, topic: actualTopic, message };
-    } catch (error) {
-      console.error(`Error publishing to ${topic}:`, error);
-      throw error;
+  async addTopic(topic) {
+    if (!this.topics.has(topic)) {
+      this.topics.add(topic);
+      this.lastUsed.set(topic, new Date());
     }
   }
 
-  // Get list of active topics
-  static getActiveTopics() {
-    return topicsManager.getAllTopics();
+  async updateLastUsed(topic) {
+    this.lastUsed.set(topic, new Date());
   }
 
-  // Check topic status
-  static getTopicStatus(topic) {
-    const exists = topicsManager.hasTopic(topic);
-    const lastUsed = topicsManager.lastUsed.get(topic);
+  async cleanupUnusedTopics() {
+    const now = new Date();
+    const cleanupInterval = environment.TOPIC_CLEANUP_INTERVAL * 60 * 60 * 1000; // Convert hours to milliseconds
+
+    for (const [topic, lastUsed] of this.lastUsed.entries()) {
+      if (!Object.values(TOPICS).includes(topic)) {
+        const timeSinceLastUse = now - lastUsed;
+        if (timeSinceLastUse > cleanupInterval) {
+          // Check if topic has any subscribers
+          const subscriberCount = await redisClient.pubsub('numsub', topic);
+          if (subscriberCount[topic] === 0) {
+            this.topics.delete(topic);
+            this.lastUsed.delete(topic);
+            console.log(`Cleaned up unused topic: ${topic}`);
+          }
+        }
+      }
+    }
+  }
+
+  getActiveTopics() {
     return {
-      exists,
-      lastUsed: lastUsed ? new Date(lastUsed) : null,
+      core: Object.values(TOPICS),
+      dynamic: Array.from(this.topics).filter(topic => !Object.values(TOPICS).includes(topic)),
+    };
+  }
+
+  getTopicStatus(topic) {
+    return {
+      exists: this.topics.has(topic),
+      isCore: Object.values(TOPICS).includes(topic),
+      lastUsed: this.lastUsed.get(topic),
     };
   }
 }
 
-// Subscriber class for handling subscriptions
-class Subscriber {
-  constructor() {
-    this.handlers = new Map();
-  }
+// Create a single instance of TopicsManager
+const topicsManager = new TopicsManager();
 
-  // Subscribe to a topic with a message handler
-  async subscribe(topic, handler) {
-    const actualTopic = topicsManager.getTopic(topic);
-
-    if (this.handlers.has(actualTopic)) {
-      throw new Error(`Handler already registered for topic: ${actualTopic}`);
-    }
-
-    this.handlers.set(actualTopic, handler);
-    await subscriber.subscribe(actualTopic, async message => {
-      try {
-        const data = JSON.parse(message);
-        // Process message in background
-        await processInBackground(actualTopic, data);
-        // Update last used timestamp
-        topicsManager.updateLastUsed(actualTopic);
-      } catch (error) {
-        console.error(`Error processing message from ${actualTopic}:`, error);
+// Publisher class for handling message publishing
+export class Publisher {
+  static async publish(topic, message) {
+    try {
+      // Add topic to manager if it's not a core topic
+      if (!Object.values(TOPICS).includes(topic)) {
+        await topicsManager.addTopic(topic);
       }
-    });
 
-    console.log(`Subscribed to topic: ${actualTopic}`);
+      // Update last used timestamp
+      await topicsManager.updateLastUsed(topic);
+
+      // Publish message
+      await redisClient.publish(topic, JSON.stringify(message));
+      console.log(`Published message to topic: ${topic}`);
+    } catch (error) {
+      console.error(`Error publishing message to topic ${topic}:`, error);
+      throw error;
+    }
   }
 
-  // Unsubscribe from a topic
-  async unsubscribe(topic) {
-    const actualTopic = topicsManager.getTopic(topic);
-    await subscriber.unsubscribe(actualTopic);
-    this.handlers.delete(actualTopic);
-    console.log(`Unsubscribed from topic: ${actualTopic}`);
+  static getActiveTopics() {
+    return topicsManager.getActiveTopics();
+  }
+
+  static getTopicStatus(topic) {
+    return topicsManager.getTopicStatus(topic);
+  }
+
+  static async cleanupUnusedTopics() {
+    await topicsManager.cleanupUnusedTopics();
   }
 }
 
-// Create subscriber instance
-const subscriberInstance = new Subscriber();
+// Subscriber class for handling message subscriptions
+export class Subscriber {
+  constructor() {
+    this.subscriptions = new Map();
+  }
 
-// Subscribe to core topics
-Object.values(CORE_TOPICS).forEach(topic => {
-  subscriberInstance.subscribe(topic, async message => {
-    await processInBackground(topic, message);
-  });
+  async subscribe(topic, callback) {
+    try {
+      if (!this.subscriptions.has(topic)) {
+        await redisClient.subscribe(topic);
+        this.subscriptions.set(topic, new Set());
+      }
+      this.subscriptions.get(topic).add(callback);
+      console.log(`Subscribed to topic: ${topic}`);
+    } catch (error) {
+      console.error(`Error subscribing to topic ${topic}:`, error);
+      throw error;
+    }
+  }
+
+  async unsubscribe(topic, callback) {
+    try {
+      const callbacks = this.subscriptions.get(topic);
+      if (callbacks) {
+        callbacks.delete(callback);
+        if (callbacks.size === 0) {
+          await redisClient.unsubscribe(topic);
+          this.subscriptions.delete(topic);
+        }
+      }
+      console.log(`Unsubscribed from topic: ${topic}`);
+    } catch (error) {
+      console.error(`Error unsubscribing from topic ${topic}:`, error);
+      throw error;
+    }
+  }
+}
+
+// Set up message handling
+redisClient.on('message', (topic, message) => {
+  try {
+    const parsedMessage = JSON.parse(message);
+    console.log(`Received message from topic ${topic}:`, parsedMessage);
+    // Handle message processing here
+  } catch (error) {
+    console.error(`Error processing message from topic ${topic}:`, error);
+  }
 });
 
-// Error handlers
-publisher.on('error', error => console.error('Publisher error:', error));
-subscriber.on('error', error => console.error('Subscriber error:', error));
+// Error handling
+redisClient.on('error', error => {
+  console.error('Redis connection error:', error);
+});
 
-export { connectRedis, Publisher, subscriberInstance as Subscriber, CORE_TOPICS as TOPICS };
+redisClient.on('connect', () => {
+  console.log('Connected to Redis');
+});
+
+export { redisClient };

@@ -8,7 +8,7 @@ const initializeCronJobs = () => {
   console.log('🚀 Initializing cron jobs...');
 
   // Start all registered jobs
-  cronManager.startAll();
+  cronManager.start();
 
   // Log initial status
   const status = cronManager.getAllJobsStatus();
@@ -18,7 +18,7 @@ const initializeCronJobs = () => {
 // Graceful shutdown
 const shutdownCronJobs = () => {
   console.log('🛑 Shutting down cron jobs...');
-  cronManager.stopAll();
+  cronManager.stop();
 };
 
 export { initializeCronJobs, shutdownCronJobs };

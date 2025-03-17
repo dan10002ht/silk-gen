@@ -25,8 +25,6 @@ const cleanupUnusedTopics = async () => {
 cronManager.addJob('cleanup-unused-topics', SCHEDULES.DAILY_3AM, cleanupUnusedTopics, {
   timezone: 'UTC',
   onError: async error => {
-    // Add error handling logic here
-    // For example: send notification, log to monitoring service, etc.
     console.error('Failed to cleanup unused topics:', error);
   },
 });

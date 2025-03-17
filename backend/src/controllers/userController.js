@@ -13,7 +13,7 @@ class UserController {
       // HTTP: Format response
       res.status(201).json({
         success: true,
-        data: user
+        data: user,
       });
     } catch (error) {
       next(error);
@@ -32,7 +32,7 @@ class UserController {
       // HTTP: Format response
       res.json({
         success: true,
-        data: updated
+        data: updated,
       });
     } catch (error) {
       next(error);
@@ -51,7 +51,7 @@ class UserController {
       // HTTP: Format response
       res.json({
         success: true,
-        message: 'Password updated successfully'
+        message: 'Password updated successfully',
       });
     } catch (error) {
       next(error);
@@ -69,7 +69,7 @@ class UserController {
       // HTTP: Format response
       res.json({
         success: true,
-        data: profile
+        data: profile,
       });
     } catch (error) {
       next(error);
@@ -77,4 +77,4 @@ class UserController {
   }
 }
 
-export default new UserController(); 
+export default new UserController();

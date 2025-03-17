@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/molecules/ProtectedRoute/ProtectedRoute';
 import Login from '@/pages/auth/Login';
@@ -9,7 +9,7 @@ import Dashboard from '@/pages/Dashboard';
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
+      <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
@@ -31,7 +31,7 @@ const App = () => {
           {/* Catch all route - redirect to dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-      </Router>
+      </BrowserRouter>
     </AuthProvider>
   );
 };

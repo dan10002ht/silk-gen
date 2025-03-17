@@ -1,38 +1,9 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { sequelize } from '../config/database.js';
+import sequelize from '../config/database.js';
 
-class User extends Model {
-  // Instance method to compare password
-  async comparePassword(candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password);
-  }
-
-  // Instance method to generate JWT token
-  generateToken() {
-    return jwt.sign(
-      {
-        id: this.id,
-        email: this.email,
-        role: this.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      }
-    );
-  }
-
-  // Remove sensitive data when converting to JSON
-  toJSON() {
-    const values = { ...this.get() };
-    delete values.password;
-    return values;
-  }
-}
-
-User.init(
+const User = sequelize.define(
+  'User',
   {
     id: {
       type: DataTypes.UUID,
@@ -45,48 +16,36 @@ User.init(
       unique: true,
       validate: {
         isEmail: true,
-        notEmpty: true,
       },
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        len: [8, 100],
-      },
     },
     firstName: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
     },
     lastName: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
     },
     role: {
-      type: DataTypes.ENUM('admin', 'manager', 'staff'),
-      defaultValue: 'staff',
+      type: DataTypes.ENUM('admin', 'user'),
+      defaultValue: 'user',
     },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
-    lastLogin: {
-      type: DataTypes.DATE,
-    },
   },
   {
-    sequelize,
-    modelName: 'User',
-    timestamps: true,
     hooks: {
-      beforeSave: async (user) => {
+      beforeCreate: async user => {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      },
+      beforeUpdate: async user => {
         if (user.changed('password')) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
@@ -96,4 +55,9 @@ User.init(
   }
 );
 
-export default User; 
+// Instance method to check password
+User.prototype.validatePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+export default User;

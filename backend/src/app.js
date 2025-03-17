@@ -1,19 +1,30 @@
 import express from 'express';
 import { cronServer } from './cron/server';
+import environment from './config/environment';
+import authRoutes from './routes/auth.js';
+import { authenticate } from './middleware/auth.js';
 
 const app = express();
 
-// ... other middleware and route setup ...
+app.use(express.json());
+
+// Public routes
+app.use('/api/auth', authRoutes);
+
+// Protected routes example
+app.use('/api/protected', authenticate, (req, res) => {
+  res.json({ message: 'This is a protected route', user: req.user });
+});
 
 // Start the server
 const startServer = async () => {
   try {
     // Start the cron server if not running in standalone mode
-    if (process.env.CRON_STANDALONE !== 'true') {
+    if (environment.CRON_STANDALONE !== 'true') {
       await cronServer.start();
     }
 
-    const PORT = process.env.PORT || 3000;
+    const PORT = environment.PORT || 3000;
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
@@ -28,7 +39,7 @@ const shutdown = async () => {
   console.log('Shutting down server...');
 
   // Stop the cron server if not running in standalone mode
-  if (process.env.CRON_STANDALONE !== 'true') {
+  if (environment.CRON_STANDALONE !== 'true') {
     await cronServer.stop();
   }
 
