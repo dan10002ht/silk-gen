@@ -5,20 +5,50 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const register = async userData => {
-    setIsLoading(true);
-    setError(null);
+  const setTokens = (accessToken, refreshToken) => {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+  };
 
+  const clearTokens = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+  };
+
+  const refreshTokens = async () => {
     try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) throw new Error('No refresh token');
+
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/register`,
-        userData
+        `${import.meta.env.VITE_API_URL}/api/auth/refresh`,
+        { refreshToken }
       );
 
-      // Store auth data
-      localStorage.setItem('token', response.data.token);
+      setTokens(response.data.accessToken, response.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
+      return response.data.accessToken;
+    } catch (error) {
+      clearTokens();
+      throw error;
+    }
+  };
+
+  const register = async (userData) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/register`, 
+        userData
+      );
+      
+      setTokens(response.data.accessToken, response.data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
       return response.data;
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
@@ -28,20 +58,19 @@ export const useAuth = () => {
     }
   };
 
-  const login = async credentials => {
+  const login = async (credentials) => {
     setIsLoading(true);
     setError(null);
-
+    
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        `${import.meta.env.VITE_API_URL}/api/auth/login`, 
         credentials
       );
-
-      // Store auth data
-      localStorage.setItem('token', response.data.token);
+      
+      setTokens(response.data.accessToken, response.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
-
+      
       return response.data;
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
@@ -52,16 +81,16 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearTokens();
   };
 
   return {
     register,
     login,
     logout,
+    refreshTokens,
     isLoading,
     error,
-    setError,
+    setError
   };
 };

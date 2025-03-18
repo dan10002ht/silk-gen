@@ -1,20 +1,7 @@
-import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import environment from '../config/environment.js';
+import TokenService from './tokenService.js';
 
 class AuthService {
-  static generateToken(user) {
-    return jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      environment.JWT_SECRET,
-      { expiresIn: environment.JWT_EXPIRES_IN }
-    );
-  }
-
   static async register(userData) {
     try {
       const existingUser = await User.findOne({
@@ -26,7 +13,7 @@ class AuthService {
       }
 
       const user = await User.create(userData);
-      const token = this.generateToken(user);
+      const tokens = TokenService.generateTokens(user);
 
       return {
         user: {
@@ -36,7 +23,7 @@ class AuthService {
           lastName: user.lastName,
           role: user.role,
         },
-        token,
+        ...tokens,
       };
     } catch (error) {
       throw error;
@@ -57,7 +44,7 @@ class AuthService {
         throw new Error('Invalid credentials');
       }
 
-      const token = this.generateToken(user);
+      const tokens = TokenService.generateTokens(user);
 
       return {
         user: {
@@ -67,7 +54,33 @@ class AuthService {
           lastName: user.lastName,
           role: user.role,
         },
-        token,
+        ...tokens,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async refresh(refreshToken) {
+    try {
+      const payload = TokenService.verifyRefreshToken(refreshToken);
+      const user = await User.findByPk(payload.id);
+
+      if (!user || !user.isActive) {
+        throw new Error('Invalid refresh token');
+      }
+
+      const tokens = TokenService.generateTokens(user);
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        },
+        ...tokens,
       };
     } catch (error) {
       throw error;
@@ -76,3 +89,4 @@ class AuthService {
 }
 
 export default AuthService;
+ a

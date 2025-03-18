@@ -1,24 +1,30 @@
-import jwt from 'jsonwebtoken';
-import environment from '../config/environment.js';
+import TokenService from '../services/tokenService.js';
 
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        error: 'Authentication required',
+      return res.status(401).json({ 
+        error: 'Authentication required' 
       });
     }
 
-    const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, environment.JWT_SECRET);
-
-    req.user = decoded;
-    next();
+    const accessToken = authHeader.split(' ')[1];
+    
+    try {
+      const decoded = TokenService.verifyAccessToken(accessToken);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      return res.status(401).json({ 
+        error: 'Token expired',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
   } catch (error) {
-    return res.status(401).json({
-      error: 'Invalid or expired token',
+    return res.status(401).json({ 
+      error: 'Authentication failed' 
     });
   }
 };

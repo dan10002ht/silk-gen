@@ -24,8 +24,10 @@ const environment = {
   CRON_STANDALONE: process.env.CRON_STANDALONE === 'true',
 
   // JWT Configuration
-  JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
+  JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'access-secret-key',
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'refresh-secret-key',
+  JWT_ACCESS_EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+  JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
 
   // API Configuration
   API_PREFIX: process.env.API_PREFIX || '/api/v1',
