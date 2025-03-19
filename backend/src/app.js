@@ -3,18 +3,13 @@ import { cronServer } from './cron/server';
 import environment from './config/environment';
 import authRoutes from './routes/auth.js';
 import { authenticate } from './middleware/auth.js';
+import setupRoutes from './routes/index.js';
 
 const app = express();
 
 app.use(express.json());
 
-// Public routes
-app.use('/api/auth', authRoutes);
-
-// Protected routes example
-app.use('/api/protected', authenticate, (req, res) => {
-  res.json({ message: 'This is a protected route', user: req.user });
-});
+setupRoutes(app);
 
 // Start the server
 const startServer = async () => {

@@ -1,34 +1,26 @@
 import { Router } from 'express';
-import { protect } from '../../middleware/auth.middleware.js';
+import { protect } from '../../middleware/authMiddleware.js';
+import {
+  login,
+  register,
+  forgotPassword,
+  logout,
+  changePassword,
+  getCurrentUser,
+} from '../../controllers/v1/authController.js';
 
 const router = Router();
 
 // Public routes
-router.post('/login', (req, res) => {
-  // Login logic here
-});
-
-router.post('/register', (req, res) => {
-  // Registration logic here
-});
-
-router.post('/forgot-password', (req, res) => {
-  // Forgot password logic here
-});
+router.post('/login', login);
+router.post('/register', register);
+router.post('/forgot-password', forgotPassword);
 
 // Protected routes
 router.use(protect); // All routes below this will require authentication
 
-router.post('/logout', (req, res) => {
-  // Logout logic here
-});
+router.post('/logout', logout);
+router.post('/change-password', changePassword);
+router.get('/me', getCurrentUser);
 
-router.post('/change-password', (req, res) => {
-  // Change password logic here
-});
-
-router.get('/me', (req, res) => {
-  // Get current user profile
-});
-
-export default router; 
+export default router;

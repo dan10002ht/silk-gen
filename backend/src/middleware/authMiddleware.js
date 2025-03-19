@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
-import User from '../models/user.model.js';
+import User from '../models/User.js';
 
 // Verify JWT token middleware
 export const protect = asyncHandler(async (req, res, next) => {
@@ -42,9 +42,4 @@ export const authorize = (...roles) => {
     }
     next();
   };
-};
-
-module.exports = {
-  protect,
-  authorize,
 };

@@ -1,5 +1,5 @@
-import { useQuery } from "react-query";
-import api from "@/lib/axios";
+import { useQuery } from 'react-query';
+import api from '@/lib/axios';
 
 export const useFetchApi = (
   endpoint,

@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { createRouteGroup } from '../../utils/routeGroup.js';
 import { protect, authorize } from '../../middleware/authMiddleware.js';
 import { apiLimiter, authLimiter } from '../../middleware/rateLimiterMiddleware.js';
+import { checkV1Health } from '../../controllers/v1/healthController.js';
+import { redirectToApiDocs } from '../../controllers/v1/docsController.js';
 
 // Import route modules
 import authRoutes from './authRoutes.js';
@@ -10,10 +12,7 @@ import userRoutes from './userRoutes.js';
 const router = Router();
 
 // Public routes group
-createRouteGroup('/auth')
-  .middleware(authLimiter)
-  .routes(authRoutes)
-  .getRouter();
+createRouteGroup('/auth').middleware(authLimiter).routes(authRoutes).getRouter();
 
 // Protected routes group
 const protectedRoutes = createRouteGroup('/users')
@@ -40,13 +39,9 @@ router.use('/admin', adminRoutes);
 router.use('/manager', managerRoutes);
 
 // Health check route
-router.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', version: 'v1' });
-});
+router.get('/health', checkV1Health);
 
 // API Documentation
-router.get('/docs', (req, res) => {
-  res.redirect('/api-docs');
-});
+router.get('/docs', redirectToApiDocs);
 
-export default router; 
+export default router;

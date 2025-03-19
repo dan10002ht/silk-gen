@@ -1,41 +1,32 @@
 import { Router } from 'express';
-import { authorize } from '../../middleware/auth.middleware.js';
+import { authorize } from '../../middleware/authMiddleware.js';
+import {
+  getUserProfile,
+  updateUserProfile,
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+} from '../../controllers/v1/userController.js';
 
 const router = Router();
 
 // Routes accessible by all authenticated users
-router.get('/profile', (req, res) => {
-  // Get user profile
-});
-
-router.put('/profile', (req, res) => {
-  // Update user profile
-});
+router.get('/profile', getUserProfile);
+router.put('/profile', updateUserProfile);
 
 // Routes accessible by managers and admins
 router.use(authorize('manager', 'admin'));
 
-router.get('/', (req, res) => {
-  // Get all users
-});
-
-router.get('/:id', (req, res) => {
-  // Get user by ID
-});
+router.get('/', getAllUsers);
+router.get('/:id', getUserById);
 
 // Routes accessible only by admins
 router.use(authorize('admin'));
 
-router.post('/', (req, res) => {
-  // Create new user
-});
+router.post('/', createUser);
+router.put('/:id', updateUser);
+router.delete('/:id', deleteUser);
 
-router.put('/:id', (req, res) => {
-  // Update user
-});
-
-router.delete('/:id', (req, res) => {
-  // Delete user
-});
-
-export default router; 
+export default router;

@@ -1,6 +1,5 @@
-import BaseRepository from './base.repository.js';
-import { User } from '../models/index.js';
-
+import BaseRepository from './baseRepository.js';
+import User from '../models/User.js';
 class UserRepository extends BaseRepository {
   constructor() {
     super(User);
@@ -21,7 +20,7 @@ class UserRepository extends BaseRepository {
   async findWithRoles(id, options = {}) {
     return this.findById(id, {
       include: ['roles'],
-      ...options
+      ...options,
     });
   }
 
@@ -30,4 +29,4 @@ class UserRepository extends BaseRepository {
   }
 }
 
-export default new UserRepository(); 
+export default new UserRepository();

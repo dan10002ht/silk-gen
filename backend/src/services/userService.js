@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import userRepository from '../repositories/user.repository.js';
+import userRepository from '../repositories/userRepository.js';
 import { BadRequestError, NotFoundError } from '../utils/errors.js';
 
 class UserService {
@@ -23,7 +23,7 @@ class UserService {
       ...userData,
       password: hashedPassword,
       status: 'active',
-      lastLoginAt: null
+      lastLoginAt: null,
     };
 
     // Data access: Delegate to repository
@@ -100,9 +100,9 @@ class UserService {
       lastName: user.lastName,
       status: user.status,
       roles: user.roles.map(role => role.name),
-      lastLoginAt: user.lastLoginAt
+      lastLoginAt: user.lastLoginAt,
     };
   }
 }
 
-export default new UserService(); 
+export default new UserService();
