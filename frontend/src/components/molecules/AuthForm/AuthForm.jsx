@@ -1,56 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
+import { loginSchema, registerSchema } from '@/lib/validations/auth';
+import { AtSign, Lock, User, LogIn, UserPlus } from 'lucide-react';
 
-const AuthForm = ({
-  isRegister,
-  formData,
-  handleChange,
-  handleSubmit,
-  loading,
-  error,
-  onClearError,
-}) => {
-  const [passwordError, setPasswordError] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+const AuthForm = ({ isRegister, initialData, onSubmit, loading, error, onClearError }) => {
+  // Set up React Hook Form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(isRegister ? registerSchema : loginSchema),
+    defaultValues: initialData || {},
+  });
 
-  const validatePassword = (e) => {
-    const password = e.target.value;
-    
-    if (isRegister && password.length > 0) {
-      if (password.length < 8) {
-        setPasswordError('Password must be at least 8 characters');
-      } else if (!/[A-Z]/.test(password)) {
-        setPasswordError('Password must contain at least one uppercase letter');
-      } else if (!/[a-z]/.test(password)) {
-        setPasswordError('Password must contain at least one lowercase letter');
-      } else if (!/[0-9]/.test(password)) {
-        setPasswordError('Password must contain at least one number');
-      } else {
-        setPasswordError('');
-      }
-    } else {
-      setPasswordError('');
-    }
-
-    handleChange(e);
-  };
-
-  const handleRememberMeChange = () => {
-    setRememberMe(!rememberMe);
-  };
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    
-    if (isRegister && passwordError) {
-      return;
-    }
-    
-    // Include rememberMe in the submit if needed
-    handleSubmit(e, rememberMe);
+  // Handle form submission
+  const processSubmit = data => {
+    onSubmit(data);
   };
 
   return (
@@ -61,112 +32,162 @@ const AuthForm = ({
         </Alert>
       )}
 
-      <form onSubmit={handleFormSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(processSubmit)} className="space-y-4">
         {isRegister && (
           <>
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="firstName" className="block mb-1 text-sm font-medium text-gray-700">
                 First Name
               </label>
-              <Input
-                id="firstName"
-                name="firstName"
-                type="text"
-                placeholder="John"
-                required
-                value={formData.firstName || ''}
-                onChange={handleChange}
-                className="w-full"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                  <User size={16} />
+                </div>
+                <Input
+                  id="firstName"
+                  {...register('firstName')}
+                  type="text"
+                  placeholder="John"
+                  className={`w-full pl-10 ${errors.firstName ? 'border-red-500 focus:ring-red-500' : 'focus:ring-primary/50'}`}
+                />
+              </div>
+              {errors.firstName && (
+                <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="lastName" className="block mb-1 text-sm font-medium text-gray-700">
                 Last Name
               </label>
-              <Input
-                id="lastName"
-                name="lastName"
-                type="text"
-                placeholder="Doe"
-                required
-                value={formData.lastName || ''}
-                onChange={handleChange}
-                className="w-full"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                  <User size={16} />
+                </div>
+                <Input
+                  id="lastName"
+                  {...register('lastName')}
+                  type="text"
+                  placeholder="Doe"
+                  className={`w-full pl-10 ${errors.lastName ? 'border-red-500 focus:ring-red-500' : 'focus:ring-primary/50'}`}
+                />
+              </div>
+              {errors.lastName && (
+                <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
+              )}
             </div>
           </>
         )}
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">
             Email
           </label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="name@example.com"
-            required
-            value={formData.email || ''}
-            onChange={handleChange}
-            className="w-full"
-            autoComplete={isRegister ? 'email' : 'username'}
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+              <AtSign size={16} />
+            </div>
+            <Input
+              id="email"
+              {...register('email')}
+              type="email"
+              placeholder="name@example.com"
+              className={`w-full pl-10 ${errors.email ? 'border-red-500 focus:ring-red-500' : 'focus:ring-primary/50'}`}
+              autoComplete={isRegister ? 'email' : 'username'}
+            />
+          </div>
+          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex justify-between items-center mb-1">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
             {!isRegister && (
-              <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+              <a
+                href="#"
+                className="text-sm font-medium text-primary hover:text-primary-hover hover:underline"
+              >
                 Forgot password?
               </a>
             )}
           </div>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder={isRegister ? 'Create a strong password' : 'Enter your password'}
-            required
-            value={formData.password || ''}
-            onChange={validatePassword}
-            className={`w-full ${passwordError ? 'border-red-500' : ''}`}
-            autoComplete={isRegister ? 'new-password' : 'current-password'}
-          />
-          {passwordError && (
-            <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+              <Lock size={16} />
+            </div>
+            <Input
+              id="password"
+              {...register('password')}
+              type="password"
+              placeholder={isRegister ? 'Create a strong password' : 'Enter your password'}
+              className={`w-full pl-10 ${errors.password ? 'border-red-500 focus:ring-red-500' : 'focus:ring-primary/50'}`}
+              autoComplete={isRegister ? 'new-password' : 'current-password'}
+            />
+          </div>
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
           )}
         </div>
 
         {!isRegister && (
           <div className="flex items-center">
             <input
-              id="remember-me"
-              name="remember-me"
+              id="rememberMe"
+              {...register('rememberMe')}
               type="checkbox"
-              checked={rememberMe}
-              onChange={handleRememberMeChange}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
             />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+            <label htmlFor="rememberMe" className="block ml-2 text-sm text-gray-700">
               Remember me
             </label>
           </div>
         )}
 
-        <div className="pt-2">
-          <Button 
-            type="submit" 
-            className="w-full py-2" 
-            disabled={loading || (isRegister && passwordError)}
+        <div className="pt-6">
+          <Button
+            type="submit"
+            className={`py-2 w-full ${isRegister ? 'bg-gradient-to-r from-secondary to-primary' : 'bg-gradient-to-r from-primary to-primary-hover'}`}
+            disabled={loading}
+            size="xl"
           >
-            {loading 
-              ? (isRegister ? 'Creating Account...' : 'Signing In...') 
-              : (isRegister ? 'Create Account' : 'Sign In')}
+            <span className="flex items-center justify-center">
+              {loading ? (
+                <span className="inline-flex items-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  {isRegister ? 'Creating Account...' : 'Signing In...'}
+                </span>
+              ) : (
+                <span className="inline-flex items-center">
+                  {isRegister ? (
+                    <UserPlus size={18} className="mr-2" />
+                  ) : (
+                    <LogIn size={18} className="mr-2" />
+                  )}
+                  <span className="font-semibold">{isRegister ? 'Create Account' : 'Sign In'}</span>
+                </span>
+              )}
+            </span>
           </Button>
         </div>
       </form>
@@ -176,14 +197,14 @@ const AuthForm = ({
 
 AuthForm.propTypes = {
   isRegister: PropTypes.bool,
-  formData: PropTypes.shape({
+  initialData: PropTypes.shape({
     email: PropTypes.string,
     password: PropTypes.string,
     firstName: PropTypes.string,
     lastName: PropTypes.string,
-  }).isRequired,
-  handleChange: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+    rememberMe: PropTypes.bool,
+  }),
+  onSubmit: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   error: PropTypes.string,
   onClearError: PropTypes.func,
@@ -192,6 +213,7 @@ AuthForm.propTypes = {
 AuthForm.defaultProps = {
   isRegister: false,
   loading: false,
+  initialData: {},
 };
 
 export default AuthForm;

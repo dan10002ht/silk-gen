@@ -157,13 +157,23 @@ redisClient.on('message', (topic, message) => {
   }
 });
 
-// Error handling
-redisClient.on('error', error => {
-  console.error('Redis connection error:', error);
-});
+export const connectRedis = async () => {
+  return new Promise((resolve, reject) => {
+    redisClient.on('connect', () => {
+      console.log('Connected to Redis');
+      resolve();
+    });
 
-redisClient.on('connect', () => {
-  console.log('Connected to Redis');
-});
+    redisClient.on('error', error => {
+      console.error('Redis connection error:', error);
+      reject(error);
+    });
+
+    // If connection is already established
+    if (redisClient.status === 'ready') {
+      resolve();
+    }
+  });
+};
 
 export { redisClient };

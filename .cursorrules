@@ -201,7 +201,7 @@ This is a web application for inventory management built with React, Javascript 
   - useFetchApi - for GET operations
   - useEditApi - for PUT/PATCH operations
   - useCreateApi - for POST operations
-- Form handling with Formik + Yup
+- Form handling with React Hook Form + Yup
 - React Query for data fetching
 - Error boundaries for error handling
 

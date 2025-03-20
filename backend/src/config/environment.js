@@ -28,7 +28,6 @@ const environment = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'refresh-secret-key',
   JWT_ACCESS_EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-
   // API Configuration
   API_PREFIX: process.env.API_PREFIX || '/api/v1',
   CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',

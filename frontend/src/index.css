@@ -1,75 +1,118 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+:root {
+  /* Base colors */
+  --background: #ffffff;
+  --foreground: #1f2937;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+  /* Card colors */
+  --card: #ffffff;
+  --card-foreground: #1f2937;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+  /* Popover colors */
+  --popover: #ffffff;
+  --popover-foreground: #1f2937;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+  /* Primary colors - Elegant Red */
+  --primary: #e11d48;
+  --primary-hover: #be123c;
+  --primary-foreground: #ffffff;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+  /* Secondary colors - Soft Rose */
+  --secondary: #fb7185;
+  --secondary-hover: #f43f5e;
+  --secondary-foreground: #ffffff;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+  /* Tertiary colors - Light Pink */
+  --tertiary: #fecdd3;
+  --tertiary-hover: #fda4af;
+  --tertiary-foreground: #9f1239;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+  /* Muted colors */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+  /* Accent colors */
+  --accent: #fdf2f8;
+  --accent-foreground: #881337;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+  /* Destructive colors */
+  --destructive: #f43f5e;
+  --destructive-hover: #e11d48;
+  --destructive-foreground: #ffffff;
 
-    --radius: 0.5rem;
-  }
+  /* Success colors */
+  --success: #10b981;
+  --success-hover: #059669;
+  --success-foreground: #ffffff;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  /* Warning colors */
+  --warning: #f59e0b;
+  --warning-hover: #d97706;
+  --warning-foreground: #ffffff;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+  /* UI colors */
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #e11d48;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
+  /* Dimensions */
+  --radius: 0.5rem;
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-  }
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+
+  /* Primary colors - Elegant Red in dark mode */
+  --primary: #fb7185;
+  --primary-hover: #f43f5e;
+  --primary-foreground: #ffffff;
+
+  /* Secondary colors - Soft Rose in dark mode */
+  --secondary: #fda4af;
+  --secondary-hover: #fb7185;
+  --secondary-foreground: #ffffff;
+
+  /* Tertiary colors - Light Pink in dark mode */
+  --tertiary: #451a1e;
+  --tertiary-hover: #5f2a35;
+  --tertiary-foreground: #fda4af;
+
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+
+  --accent: #4c1d27;
+  --accent-foreground: #fda4af;
+
+  --destructive: #fb7185;
+  --destructive-hover: #f43f5e;
+  --destructive-foreground: #ffffff;
+
+  --success: #34d399;
+  --success-hover: #10b981;
+  --success-foreground: #ffffff;
+
+  --warning: #fbbf24;
+  --warning-hover: #f59e0b;
+  --warning-foreground: #ffffff;
+
+  --border: #334155;
+  --input: #334155;
+  --ring: #fb7185;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
 }

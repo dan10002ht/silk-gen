@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { register, clearError } from '@/store/slices/authSlice';
+import { register as registerAction, clearError } from '@/store/slices/authSlice';
 import { AuthLayout } from '@/components/templates';
 import AuthForm from '@/components/molecules/AuthForm';
 
@@ -11,23 +10,8 @@ const Register = () => {
   const navigate = useNavigate();
   const { loading, error } = useSelector(state => state.auth);
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-  });
-
-  const handleChange = e => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    const result = await dispatch(register(formData));
+  const handleSubmit = async data => {
+    const result = await dispatch(registerAction(data));
     if (!result.error) {
       navigate('/dashboard');
     }
@@ -43,9 +27,8 @@ const Register = () => {
     >
       <AuthForm
         isRegister
-        formData={formData}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
+        initialData={{ email: '', password: '', firstName: '', lastName: '' }}
+        onSubmit={handleSubmit}
         loading={loading}
         error={error}
         onClearError={() => dispatch(clearError())}

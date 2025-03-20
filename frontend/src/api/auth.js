@@ -12,8 +12,8 @@ export const authApi = {
     return response.data;
   },
 
-  login: async ({ email, password, rememberMe }) => {
-    const response = await axios.post(`${API_URL}/auth/login`, { email, password, rememberMe });
+  login: async ({ email, password, rememberMe = false }) => {
+    const response = await axios.post(`${API_URL}/auth/login`, { email, password });
     if (response.data.token) {
       const storageMethod = rememberMe ? localStorage : sessionStorage;
       storageMethod.setItem('token', response.data.token);

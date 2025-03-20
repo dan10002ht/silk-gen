@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
@@ -11,21 +10,8 @@ const Login = () => {
   const navigate = useNavigate();
   const { loading, error } = useSelector(state => state.auth);
 
-  const [credentials, setCredentials] = useState({
-    email: '',
-    password: '',
-  });
-
-  const handleChange = e => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e, rememberMe = false) => {
-    e.preventDefault();
-    const result = await dispatch(login({ ...credentials, rememberMe }));
+  const handleSubmit = async data => {
+    const result = await dispatch(login(data));
     if (!result.error) {
       navigate('/dashboard');
     }
@@ -41,9 +27,8 @@ const Login = () => {
       isLoginPage
     >
       <AuthForm
-        formData={credentials}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
+        initialData={{ email: '', password: '', rememberMe: false }}
+        onSubmit={handleSubmit}
         loading={loading}
         error={error}
         onClearError={() => dispatch(clearError())}
